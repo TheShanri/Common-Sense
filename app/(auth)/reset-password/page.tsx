@@ -29,6 +29,7 @@ function ResetPasswordFormFallback() {
 }
 
 export default function ResetPasswordPage() {
+
   return (
     <main className="container" style={{ maxWidth: '480px' }}>
       <div className="card">
@@ -41,6 +42,7 @@ export default function ResetPasswordPage() {
         <Suspense fallback={<ResetPasswordFormFallback />}>
           <ResetPasswordForm />
         </Suspense>
+
 
         <p style={{ marginTop: '1.5rem', color: '#475569' }}>
           Changed your mind?{' '}
