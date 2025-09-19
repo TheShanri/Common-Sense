@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { extractErrorMessage } from '@/lib/http';
+
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -32,9 +34,9 @@ export default function RegisterPage() {
       });
 
       if (!response.ok) {
-        const payload = await response.json();
-        throw new Error(payload.error ?? 'Unable to create your account.');
-      }
+        const message = await extractErrorMessage(response, 'Unable to create your account.');
+        throw new Error(message);
+
 
       router.push('/dashboard');
       router.refresh();

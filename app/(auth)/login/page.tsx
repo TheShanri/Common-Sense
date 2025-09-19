@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { extractErrorMessage } from '@/lib/http';
+
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,8 +28,9 @@ export default function LoginPage() {
       });
 
       if (!response.ok) {
-        const payload = await response.json();
-        throw new Error(payload.error ?? 'Unable to sign in.');
+        const message = await extractErrorMessage(response, 'Unable to sign in.');
+        throw new Error(message);
+
       }
 
       router.push('/dashboard');
