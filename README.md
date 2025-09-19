@@ -1,5 +1,6 @@
 # Common Sense Exchange
 
+
 Common Sense Exchange is a Next.js learning and dialogue platform designed for Vercel + Supabase deployments. The application lets people:
 
 - Register and sign in with email/password credentials stored securely in Supabase Postgres.

@@ -5,6 +5,7 @@ import { recordQuizSubmission } from '@/lib/storage';
 
 export const runtime = 'nodejs';
 
+
 const paramsSchema = z.object({
   quizId: z.string().min(1)
 });

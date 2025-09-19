@@ -16,6 +16,17 @@ type EnvConfig = z.infer<typeof schema>;
 let cachedEnv: EnvConfig | null = null;
 
 export function getEnv(): EnvConfig {
+
+  DATABASE_URL: z.string().url().or(z.string().min(1)).optional(),
+  JWT_SECRET: z
+    .string()
+    .min(32, 'JWT_SECRET must be at least 32 characters long.')
+    .default('development-secret-please-update-32-char-min')
+});
+
+let cachedEnv: z.infer<typeof schema> | null = null;
+
+export function getEnv() {
   if (cachedEnv) {
     return cachedEnv;
   }
@@ -32,4 +43,9 @@ export function getEnv(): EnvConfig {
 
   cachedEnv = parsed.data;
   return cachedEnv;
+    throw new Error(`Invalid environment configuration: ${parsed.error.message}`);
+  }
+
+  cachedEnv = parsed.data;
+  return parsed.data;
 }

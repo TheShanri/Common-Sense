@@ -2,8 +2,8 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import LogoutButton from '@/components/logout-button';
 import { requireUser } from '@/lib/session';
-
 export const runtime = 'nodejs';
+
 
 export default async function DashboardLayout({
   children

@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createSessionToken, setSessionCookie, verifyPassword } from '@/lib/auth';
 import { getUserByEmail } from '@/lib/storage';
-
 export const runtime = 'nodejs';
+
 
 const schema = z.object({
   email: z.string().email('Enter the email you used to sign up.'),
