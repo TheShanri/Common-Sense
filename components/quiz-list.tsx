@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { QuizDetails, QuizSubmissionResult, QuizSummary } from '@/lib/storage';
@@ -99,7 +100,12 @@ export default function QuizList({ quizzes }: QuizListProps) {
 
   return (
     <div className="card">
-      <h2>Knowledge checks</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+        <h2 style={{ marginBottom: 0 }}>Knowledge checks</h2>
+        <Link href="/dashboard/quizzes" className="secondary-button" style={{ padding: '0.4rem 1rem' }}>
+          View all quizzes
+        </Link>
+      </div>
       <p style={{ marginBottom: '1.25rem' }}>
         Complete quizzes to validate your understanding and unlock deeper discussions.
       </p>

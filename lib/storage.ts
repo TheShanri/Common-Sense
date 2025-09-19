@@ -15,6 +15,21 @@ export interface CreateUserInput {
   passwordHash: string;
 }
 
+export interface PasswordResetTokenRecord {
+  token: string;
+  userId: string;
+  createdAt: string;
+  expiresAt: string;
+  usedAt: string | null;
+}
+
+export interface CommunityMemberSummary {
+  id: string;
+  username: string;
+  orientationScore: number | null;
+  joinedAt: string;
+}
+
 export interface ModuleSummary {
   id: string;
   title: string;
@@ -102,6 +117,18 @@ export interface ChatMessage {
   id: string;
   matchId: string;
   senderId: string;
+  content: string;
+  sentAt: string;
+  author?: {
+    id: string;
+    username: string;
+  };
+}
+
+export interface DirectMessage {
+  id: string;
+  senderId: string;
+  receiverId: string;
   content: string;
   sentAt: string;
   author?: {
@@ -209,6 +236,83 @@ export async function getUserById(id: string): Promise<Omit<UserRecord, 'passwor
   }
   const { passwordHash, ...rest } = result.rows[0];
   return { ...rest };
+}
+
+export async function savePasswordResetToken(
+  userId: string,
+  token: string,
+  expiresAt: Date
+): Promise<PasswordResetTokenRecord> {
+  await query('DELETE FROM password_reset_tokens WHERE user_id = $1 OR expires_at < NOW()', [userId]);
+
+  const { rows } = await query<PasswordResetTokenRecord>(
+    `INSERT INTO password_reset_tokens (token, user_id, expires_at)
+     VALUES ($1, $2, $3)
+     ON CONFLICT (token)
+     DO UPDATE SET
+       user_id = EXCLUDED.user_id,
+       expires_at = EXCLUDED.expires_at,
+       used_at = NULL,
+       created_at = NOW()
+     RETURNING token, user_id AS "userId", created_at AS "createdAt", expires_at AS "expiresAt", used_at AS "usedAt"`,
+    [token, userId, expiresAt]
+  );
+
+  return rows[0];
+}
+
+export async function resetPasswordWithToken(
+  token: string,
+  passwordHash: string
+): Promise<Omit<UserRecord, 'passwordHash'> | null> {
+  return withTransaction(async (client) => {
+    const { rows } = await client.query<{
+      userId: string;
+      expiresAt: string;
+      usedAt: string | null;
+      email: string;
+      username: string;
+      createdAt: string;
+    }>(
+      `SELECT
+         prt.user_id AS "userId",
+         prt.expires_at AS "expiresAt",
+         prt.used_at AS "usedAt",
+         u.email,
+         u.username,
+         u.created_at AS "createdAt"
+       FROM password_reset_tokens prt
+       INNER JOIN users u ON u.id = prt.user_id
+       WHERE prt.token = $1
+       FOR UPDATE`,
+      [token]
+    );
+
+    const record = rows[0];
+    if (!record) {
+      return null;
+    }
+
+    if (record.usedAt) {
+      return null;
+    }
+
+    const expiresAt = new Date(record.expiresAt);
+    if (Number.isNaN(expiresAt.valueOf()) || expiresAt.getTime() < Date.now()) {
+      await client.query('DELETE FROM password_reset_tokens WHERE token = $1', [token]);
+      return null;
+    }
+
+    await client.query('UPDATE users SET password_hash = $1 WHERE id = $2', [passwordHash, record.userId]);
+    await client.query('UPDATE password_reset_tokens SET used_at = NOW() WHERE token = $1', [token]);
+
+    return {
+      id: record.userId,
+      email: record.email,
+      username: record.username,
+      createdAt: record.createdAt
+    };
+  });
 }
 
 export async function listLearningModulesForUser(userId: string): Promise<ModuleSummary[]> {
@@ -422,6 +526,107 @@ export async function getOrientationScore(userId: string): Promise<number | null
     [userId]
   );
   return rows[0]?.orientation_score != null ? Number(rows[0].orientation_score) : null;
+}
+
+export async function listCommunityMembers(currentUserId: string): Promise<CommunityMemberSummary[]> {
+  const { rows } = await query<{
+    id: string;
+    username: string;
+    joinedAt: string;
+    orientationScore: number | null;
+  }>(
+    `SELECT
+        u.id,
+        u.username,
+        u.created_at AS "joinedAt",
+        cp.orientation_score AS "orientationScore"
+      FROM users u
+      LEFT JOIN chat_preferences cp ON cp.user_id = u.id
+      WHERE u.id <> $1
+      ORDER BY u.username ASC`,
+    [currentUserId]
+  );
+
+  return rows.map((row) => ({
+    id: row.id,
+    username: row.username,
+    joinedAt: row.joinedAt,
+    orientationScore: row.orientationScore != null ? Number(row.orientationScore) : null
+  }));
+}
+
+export async function listDirectMessagesBetween(
+  userId: string,
+  otherUserId: string,
+  limit = 200
+): Promise<DirectMessage[]> {
+  const { rows } = await query<{
+    id: string;
+    senderId: string;
+    receiverId: string;
+    content: string;
+    sentAt: string;
+    authorUsername: string | null;
+  }>(
+    `SELECT
+        dm.id,
+        dm.sender_id AS "senderId",
+        dm.receiver_id AS "receiverId",
+        dm.content,
+        dm.sent_at AS "sentAt",
+        sender.username AS "authorUsername"
+      FROM direct_messages dm
+      LEFT JOIN users sender ON sender.id = dm.sender_id
+      WHERE (dm.sender_id = $1 AND dm.receiver_id = $2)
+         OR (dm.sender_id = $2 AND dm.receiver_id = $1)
+      ORDER BY dm.sent_at ASC
+      LIMIT $3`,
+    [userId, otherUserId, limit]
+  );
+
+  return rows.map((row) => ({
+    id: row.id,
+    senderId: row.senderId,
+    receiverId: row.receiverId,
+    content: row.content,
+    sentAt: row.sentAt,
+    author: row.authorUsername
+      ? {
+          id: row.senderId,
+          username: row.authorUsername
+        }
+      : undefined
+  }));
+}
+
+export async function sendDirectMessage(
+  senderId: string,
+  receiverId: string,
+  content: string
+): Promise<DirectMessage> {
+  const { rows } = await query<DirectMessage>(
+    `INSERT INTO direct_messages (sender_id, receiver_id, content)
+     VALUES ($1, $2, $3)
+     RETURNING id, sender_id AS "senderId", receiver_id AS "receiverId", content, sent_at AS "sentAt"`,
+    [senderId, receiverId, content]
+  );
+
+  const message = rows[0];
+
+  const authorResult = await query<{ username: string }>(
+    `SELECT username FROM users WHERE id = $1`,
+    [senderId]
+  );
+
+  return {
+    ...message,
+    author: authorResult.rows[0]
+      ? {
+          id: senderId,
+          username: authorResult.rows[0].username
+        }
+      : undefined
+  };
 }
 
 export async function getActiveMatch(userId: string): Promise<ChatMatch | null> {

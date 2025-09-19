@@ -10,6 +10,17 @@ create table if not exists public.users (
   created_at timestamptz not null default now()
 );
 
+-- Password reset tokens for account recovery
+create table if not exists public.password_reset_tokens (
+  token text primary key,
+  user_id uuid not null references public.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  expires_at timestamptz not null,
+  used_at timestamptz
+);
+
+create index if not exists password_reset_tokens_user_idx on public.password_reset_tokens (user_id);
+
 -- Learning modules
 create table if not exists public.learning_modules (
   id uuid primary key default gen_random_uuid(),
@@ -102,6 +113,17 @@ create table if not exists public.chat_messages (
   content text not null,
   sent_at timestamptz not null default now()
 );
+
+-- Direct message threads between any two members
+create table if not exists public.direct_messages (
+  id uuid primary key default gen_random_uuid(),
+  sender_id uuid not null references public.users(id) on delete cascade,
+  receiver_id uuid not null references public.users(id) on delete cascade,
+  content text not null,
+  sent_at timestamptz not null default now()
+);
+
+create index if not exists direct_messages_participants_idx on public.direct_messages (sender_id, receiver_id, sent_at);
 
 -- Seed default learning content (idempotent)
 insert into public.learning_modules (id, title, description, content, order_index)
