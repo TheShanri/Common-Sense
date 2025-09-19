@@ -36,7 +36,7 @@ export default function RegisterPage() {
       if (!response.ok) {
         const message = await extractErrorMessage(response, 'Unable to create your account.');
         throw new Error(message);
-
+      }
 
       router.push('/dashboard');
       router.refresh();
