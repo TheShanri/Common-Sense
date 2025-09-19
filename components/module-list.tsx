@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import type { ModuleSummary } from '@/lib/storage';
 
@@ -48,7 +49,12 @@ export default function ModuleList({ modules: initialModules }: ModuleListProps)
 
   return (
     <div className="card">
-      <h2>Learning modules</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+        <h2 style={{ marginBottom: 0 }}>Learning modules</h2>
+        <Link href="/dashboard/modules" className="secondary-button" style={{ padding: '0.4rem 1rem' }}>
+          Explore modules
+        </Link>
+      </div>
       <p style={{ marginBottom: '1.25rem' }}>
         Work through guided lessons and mark them complete once you feel confident in the material.
       </p>
