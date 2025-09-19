@@ -19,10 +19,6 @@ function parseNumericEnv(value: string | undefined, fallback: number) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-import { Pool, type PoolClient, type QueryResult } from 'pg';
-import { getEnv } from './env';
-
-let pool: Pool | null = null;
 
 function createPool() {
   const { DATABASE_URL } = getEnv();
@@ -40,16 +36,6 @@ function createPool() {
     connectionTimeoutMillis,
     keepAlive: true
 
-  if (!DATABASE_URL) {
-    throw new Error('DATABASE_URL is not configured. Set it in your environment variables.');
-  }
-
-  const shouldUseSsl = process.env.DATABASE_SSL !== 'false';
-
-  return new Pool({
-    connectionString: DATABASE_URL,
-    ssl: shouldUseSsl ? { rejectUnauthorized: false } : undefined
-
   });
 }
 
@@ -63,17 +49,6 @@ export function getPool() {
 
 export function query<T extends QueryResultRow = QueryResultRow>(text: string, params: unknown[] = []) {
   return getPool().query<T>(text, params as unknown[]);
-  if (!pool) {
-    pool = createPool();
-  }
-
-  return pool;
-}
-
-export async function query<T = unknown>(text: string, params: unknown[] = []) {
-  const result: QueryResult<T> = await getPool().query(text, params);
-  return result;
-
 }
 
 export async function withTransaction<T>(callback: (client: PoolClient) => Promise<T>) {
