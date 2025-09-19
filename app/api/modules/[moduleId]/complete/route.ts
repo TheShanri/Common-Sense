@@ -3,6 +3,9 @@ import { z } from 'zod';
 import { getCurrentUser } from '@/lib/session';
 import { markModuleAsCompleted } from '@/lib/storage';
 
+export const runtime = 'nodejs';
+
+
 const paramsSchema = z.object({
   moduleId: z.string().min(1, 'Module id is required.')
 });

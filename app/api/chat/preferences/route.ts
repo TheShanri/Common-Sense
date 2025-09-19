@@ -3,6 +3,9 @@ import { z } from 'zod';
 import { getCurrentUser } from '@/lib/session';
 import { attemptMatchWithPeer, getActiveMatch, saveOpinionResponses } from '@/lib/storage';
 
+export const runtime = 'nodejs';
+
+
 const payloadSchema = z.object({
   responses: z
     .array(

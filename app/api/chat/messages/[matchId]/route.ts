@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { getCurrentUser } from '@/lib/session';
 import { addMessage, listMessages, userIsInMatch } from '@/lib/storage';
 
+export const runtime = 'nodejs';
+
 const paramsSchema = z.object({
   matchId: z.string().min(1)
 });
