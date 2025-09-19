@@ -46,7 +46,7 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
-
+// d
   return (
     <main className="container" style={{ maxWidth: '480px' }}>
       <div className="card">
