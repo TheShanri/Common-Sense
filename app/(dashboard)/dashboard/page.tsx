@@ -12,6 +12,7 @@ import {
 } from '@/lib/storage';
 
 export const runtime = 'nodejs';
+
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
