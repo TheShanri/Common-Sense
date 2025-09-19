@@ -14,7 +14,8 @@ The sections below walk through the entire local setup process in more detail an
 
 - **Node.js 18+** – Matches the Vercel runtime and the version declared in the project (use [nvm](https://github.com/nvm-sh/nvm) or Volta if you manage multiple versions).
 - **npm 9+** – Bundled with Node.js and used for dependency management.
-- **Supabase project (or any Postgres database)** – The provided Supabase connection string from the prompt will also work for local development.
+- **Supabase project (or any Postgres database)** – Create your own Supabase project (or point the app at an existing Postgres instance). You will copy the connection pooling string from **Project Settings → Database → Connection pooling** in a later step.
+
 - **`psql` client or Supabase SQL editor access** – Needed to run the schema and seed script located in `supabase/schema.sql`.
 - (Optional) **OpenSSL or another secret generator** – Handy for creating a secure JWT signing secret.
 
@@ -38,7 +39,14 @@ cp .env.example .env.local
 
 Open `.env.local` and update:
 
-- `DATABASE_URL` – keep the Supabase connection pooling string provided in the sample file or paste the value from **Project Settings → Database → Connection pooling**. Pooling is strongly recommended for Vercel so each serverless invocation reuses a tiny number of connections (`pgbouncer=true&connection_limit=1`).
+- `DATABASE_URL` – paste the Supabase connection pooling string from **Project Settings → Database → Connection pooling**. It follows this format:
+
+  ```env
+  DATABASE_URL=postgresql://postgres:YOUR_SUPABASE_PASSWORD@YOUR_PROJECT_HOST.supabase.co:6543/postgres?sslmode=require&pgbouncer=true&connection_limit=1
+  ```
+
+  Replace `YOUR_SUPABASE_PASSWORD` and `YOUR_PROJECT_HOST` with the values shown in the Supabase dashboard. Pooling is strongly recommended for Vercel so each serverless invocation reuses a tiny number of connections.
+
 - `JWT_SECRET` – replace the placeholder with a randomly generated secret that is at least 32 characters. `openssl rand -hex 32` is a quick way to generate one.
 
 The helper in `lib/env.ts` validates both variables on boot. If either value is missing or too short, the server will crash with a clear error message so you can fix the configuration.
