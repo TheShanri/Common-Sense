@@ -16,6 +16,7 @@ type EnvConfig = z.infer<typeof schema>;
 let cachedEnv: EnvConfig | null = null;
 
 export function getEnv(): EnvConfig {
+
   if (cachedEnv) {
     return cachedEnv;
   }
@@ -32,4 +33,5 @@ export function getEnv(): EnvConfig {
 
   cachedEnv = parsed.data;
   return cachedEnv;
+
 }

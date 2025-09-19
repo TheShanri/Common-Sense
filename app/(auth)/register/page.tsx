@@ -5,6 +5,7 @@ import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { extractErrorMessage } from '@/lib/http';
 
+
 export default function RegisterPage() {
   const router = useRouter();
   const [username, setUsername] = useState('');
@@ -35,7 +36,7 @@ export default function RegisterPage() {
       if (!response.ok) {
         const message = await extractErrorMessage(response, 'Unable to create your account.');
         throw new Error(message);
-      }
+
 
       router.push('/dashboard');
       router.refresh();

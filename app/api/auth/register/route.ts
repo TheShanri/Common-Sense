@@ -5,6 +5,7 @@ import { createUser, getUserByEmail, getUserByUsername } from '@/lib/storage';
 
 export const runtime = 'nodejs';
 
+
 const schema = z.object({
   email: z.string().email('Please provide a valid email.'),
   username: z

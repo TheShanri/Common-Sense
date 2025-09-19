@@ -14,6 +14,7 @@ The sections below walk through the entire local setup process in more detail an
 - **Node.js 18+** – Matches the Vercel runtime and the version declared in the project (use [nvm](https://github.com/nvm-sh/nvm) or Volta if you manage multiple versions).
 - **npm 9+** – Bundled with Node.js and used for dependency management.
 - **Supabase project (or any Postgres database)** – Create your own Supabase project (or point the app at an existing Postgres instance). You will copy the connection pooling string from **Project Settings → Database → Connection pooling** in a later step.
+
 - **`psql` client or Supabase SQL editor access** – Needed to run the schema and seed script located in `supabase/schema.sql`.
 - (Optional) **OpenSSL or another secret generator** – Handy for creating a secure JWT signing secret.
 
@@ -44,6 +45,7 @@ Open `.env.local` and update:
   ```
 
   Replace `YOUR_SUPABASE_PASSWORD` and `YOUR_PROJECT_HOST` with the values shown in the Supabase dashboard. Pooling is strongly recommended for Vercel so each serverless invocation reuses a tiny number of connections.
+
 - `JWT_SECRET` – replace the placeholder with a randomly generated secret that is at least 32 characters. `openssl rand -hex 32` is a quick way to generate one.
 
 The helper in `lib/env.ts` validates both variables on boot. If either value is missing or too short, the server will crash with a clear error message so you can fix the configuration.

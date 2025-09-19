@@ -19,6 +19,7 @@ function parseNumericEnv(value: string | undefined, fallback: number) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+
 function createPool() {
   const { DATABASE_URL } = getEnv();
 
@@ -34,6 +35,7 @@ function createPool() {
     idleTimeoutMillis,
     connectionTimeoutMillis,
     keepAlive: true
+
   });
 }
 

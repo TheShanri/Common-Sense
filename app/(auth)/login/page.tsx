@@ -5,6 +5,7 @@ import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { extractErrorMessage } from '@/lib/http';
 
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -29,6 +30,7 @@ export default function LoginPage() {
       if (!response.ok) {
         const message = await extractErrorMessage(response, 'Unable to sign in.');
         throw new Error(message);
+
       }
 
       router.push('/dashboard');
