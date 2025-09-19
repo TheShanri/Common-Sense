@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
+import DashboardNav from '@/components/dashboard-nav';
 import LogoutButton from '@/components/logout-button';
 import { requireUser } from '@/lib/session';
 
@@ -42,6 +43,8 @@ export default async function DashboardLayout({
             <LogoutButton />
           </div>
         </div>
+
+        <DashboardNav />
       </header>
 
       <main>{children}</main>

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { FormEvent, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { ChatMatch, ChatMessage, OpinionQuestion } from '@/lib/storage';
@@ -164,6 +165,9 @@ export default function ChatSection({
       <p style={{ marginBottom: '1.25rem' }}>
         Share your stance on a few real-world topics. We will match you with someone nearby on the spectrum so you can practice
         constructive dialogue.
+      </p>
+      <p style={{ marginTop: '-0.5rem', marginBottom: '1rem', color: '#1d4ed8', fontWeight: 600 }}>
+        <Link href="/dashboard/chat">Open the direct message lounge →</Link>
       </p>
 
       {orientationScore != null ? (
